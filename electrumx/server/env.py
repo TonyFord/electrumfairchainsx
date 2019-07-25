@@ -9,16 +9,21 @@
 
 
 import re
+import sys
+import os
+
 from ipaddress import IPv4Address, IPv6Address
 
 from aiorpcx import Service, ServicePart
 from electrumx.lib.coins import Coin
+from electrumx.lib.coins import FairChains
 from electrumx.lib.env_base import EnvBase
 
 
 class ServiceError(Exception):
     pass
 
+# get commandline params
 
 class Env(EnvBase):
     '''Wraps environment configuration. Optionally, accepts a Coin class
@@ -31,7 +36,7 @@ class Env(EnvBase):
     SSL_PROTOCOLS = {'ssl', 'wss'}
     KNOWN_PROTOCOLS = {'ssl', 'tcp', 'ws', 'wss', 'rpc'}
 
-    def __init__(self, coin=None):
+    def __init__(self):
         super().__init__()
         self.obsolete(["MAX_SUBSCRIPTIONS", "MAX_SUBS", "MAX_SESSION_SUBS", "BANDWIDTH_LIMIT",
                        "HOST", "TCP_PORT", "SSL_PORT", "RPC_HOST", "RPC_PORT", "REPORT_HOST",
@@ -39,16 +44,22 @@ class Env(EnvBase):
                        "REPORT_TCP_PORT_TOR", "REPORT_SSL_PORT_TOR"])
 
         # Core items
+        self.coin=FairChains
 
-        self.db_dir = self.required('DB_DIRECTORY')
-        self.daemon_url = self.required('DAEMON_URL')
-        if coin is not None:
-            assert issubclass(coin, Coin)
-            self.coin = coin
-        else:
-            coin_name = self.required('COIN').strip()
-            network = self.default('NET', 'mainnet').strip()
-            self.coin = Coin.lookup_coin_class(coin_name, network)
+        print( '\nget DB_DIRECTORY from fairchains.conf' )
+        print( self.coin.DB_DIRECTORY )
+        print( '\n' )
+        self.db_dir=self.coin.DB_DIRECTORY
+
+        # create directory of not exists
+        if not os.path.isdir(self.coin.DB_DIRECTORY):
+            print( 'DB_DIRECTORY not exists -> mkdir')
+            os.mkdir(self.coin.DB_DIRECTORY)
+
+        print( '\nget DAEMON_URL from fairchains.conf' )
+        print(self.coin.DAEMON_URL)
+        print( '\n' )
+        self.daemon_url = self.coin.DAEMON_URL
 
         # Peer discovery
 
@@ -89,8 +100,12 @@ class Env(EnvBase):
 
         self.services = self.services_to_run()
         if {service.protocol for service in self.services}.intersection(self.SSL_PROTOCOLS):
-            self.ssl_certfile = self.required('SSL_CERTFILE')
-            self.ssl_keyfile = self.required('SSL_KEYFILE')
+
+            # self.ssl_certfile = self.required('SSL_CERTFILE')
+            self.ssl_certfile=self.coin.SSL_CERTFILE
+            # self.ssl_keyfile = self.required('SSL_KEYFILE')
+            self.ssl_keyfile=self.coin.SSL_KEYFILE
+
         self.report_services = self.services_to_report()
 
     def sane_max_sessions(self):
@@ -136,23 +151,30 @@ class Env(EnvBase):
         return result
 
     def services_to_run(self):
+
         def default_part(protocol, part):
             return default_services.get(protocol, {}).get(part)
+
+        # if env SERVICES not set then get it from /home/<myusername>/.fairchains/<myFairChains>.electrumx.json
+        if( os.environ.get('SERVICES') == None ):
+            result=[Service('rpc', '127.0.0.1:8002'),Service('ssl', '127.0.0.1:8004')]
 
         default_services = {protocol: {ServicePart.HOST: 'all_interfaces'}
                             for protocol in self.KNOWN_PROTOCOLS}
         default_services['rpc'] = {ServicePart.HOST: 'localhost', ServicePart.PORT: 8000}
-        services = self._parse_services(self.default('SERVICES', ''), default_part)
+        services = self._parse_services(self.default('SERVICES', self.coin.SERVICES ), default_part)
 
         # Find onion hosts
         for service in services:
             if str(service.host).endswith('.onion'):
                 raise ServiceError(f'bad host for SERVICES: {service}')
 
+        print('\nAvailable SERVICES')
+        print(services)
         return services
 
     def services_to_report(self):
-        services = self._parse_services(self.default('REPORT_SERVICES', ''), None)
+        services = self._parse_services(self.default('REPORT_SERVICES', self.coin.REPORT_SERVICES), None)
 
         for service in services:
             if service.protocol == 'rpc':
@@ -165,6 +187,8 @@ class Env(EnvBase):
             elif service.host.lower() == 'localhost':
                 raise ServiceError(f'bad host for REPORT_SERVICES: {service.host}')
 
+        print('\nAvailable REPORT_SERVICES')
+        print(services)
         return services
 
     def peer_discovery_enum(self):

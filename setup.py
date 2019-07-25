@@ -1,10 +1,10 @@
 import setuptools
-version = '1.12.0'
+version = '1.12.0-fcx'
 
 setuptools.setup(
     name='electrumX',
     version=version,
-    scripts=['electrumx_server', 'electrumx_rpc', 'electrumx_compact_history'],
+    scripts=['efcx_server', 'efcx_rpc', 'efcx_compact_history'],
     python_requires='>=3.6',
     install_requires=['aiorpcX[ws]>=0.18.1,<0.19', 'attrs',
                       'plyvel', 'pylru', 'aiohttp>=3.3'],
