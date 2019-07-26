@@ -18,17 +18,20 @@ See https://electrumx.readthedocs.io/
 ### Installation ElectrumFairChainsX
 
 #### Install Python3
-Recommend version `3.7+`
+Recommend version `3.7.4`
 
 `python3 -V` to check your installed version
 
-Instructions:
-http://ubuntuhandbook.org/index.php/2017/07/install-python-3-6-1-in-ubuntu-16-04-lts/
+Download Python source ( gzipped or tar.gz ) https://www.python.org/downloads/release/python-374/ and extract it
+~~~
+tar -xvf Python-3.7.4.tgz
+cd Python-3.7.4
+./configure
+make
+sudo make install
+~~~
+alternatively `sudo make altinstall`
 
-#### Install Pip3
-
-Instructions:
-https://askubuntu.com/questions/778052/installing-pip3-for-python3-on-ubuntu-16-04-lts-using-a-proxy#778058
 
 #### Install required python packages
 ~~~
@@ -111,14 +114,19 @@ Example:
   ],
   "SERVICES" : [
       "rcp://127.0.0.1:8002",
-      "ssl://127.0.0.1:8004"
+      "ssl://<server.example.org:52812>"
   ],
   "REPORT_SERVICES" :
   [
-     "ssl://<electrum.mydomain.org>:52812"
+     "ssl://<electrum.example.co>:52812"
   ]
 }
 ~~~
+
+`SERVICES` should be the address of the server where peers/clients can connect.
+It is recommend to use the default ports for the services, see `PEER_DEFAULT_PORTS`
+`REPORT_SERVICES` is the address to a peer where the `SERVICES` will reported.
+
 
 ###### FairChain Supporters
 If you are not the creator of an public FairChain then you  can try to get it from fairchains-collection repository ( https://github.com/TonyFord/fairchains-collection.git ) or ask the creator.
@@ -142,3 +150,12 @@ If you are not the creator of an public FairChain then you  can try to get it fr
 | `REPORT_SERVICES` | Environment | `REPORT_SERVICES` get from `(fairchains_path)/<your_fairchain_name>.electrumx.json` |
 | `SSL_KEYFILE` | Environment | `(fairchains_path)/electrumx.key` |
 | `SSL_CERTFILE` | Environment | `(fairchains_path)/electrumx.crt` |
+
+
+#### [optional but recommend] Create an own user for electrumX server
+
+~~~
+sudo adduser <username>
+sudo usermod -aG sudo <username>
+~~~
+https://www.digitalocean.com/community/tutorials/how-to-create-a-sudo-user-on-ubuntu-quickstart
