@@ -48,7 +48,6 @@ class Env(EnvBase):
 
         print( '\nget DB_DIRECTORY from fairchains.conf' )
         print( self.coin.DB_DIRECTORY )
-        print( '\n' )
         self.db_dir=self.coin.DB_DIRECTORY
 
         # create directory of not exists
@@ -58,7 +57,6 @@ class Env(EnvBase):
 
         print( '\nget DAEMON_URL from fairchains.conf' )
         print(self.coin.DAEMON_URL)
-        print( '\n' )
         self.daemon_url = self.coin.DAEMON_URL
 
         # Peer discovery
@@ -101,10 +99,11 @@ class Env(EnvBase):
         self.services = self.services_to_run()
         if {service.protocol for service in self.services}.intersection(self.SSL_PROTOCOLS):
 
-            # self.ssl_certfile = self.required('SSL_CERTFILE')
             self.ssl_certfile=self.coin.SSL_CERTFILE
-            # self.ssl_keyfile = self.required('SSL_KEYFILE')
+            print( '\nSSL_CERTFILE : '+self.coin.SSL_CERTFILE )
+
             self.ssl_keyfile=self.coin.SSL_KEYFILE
+            print( '\nSSL_KEYFILE : '+self.coin.SSL_KEYFILE )
 
         self.report_services = self.services_to_report()
 

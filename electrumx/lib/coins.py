@@ -423,7 +423,7 @@ class FairChains(Coin):
     # env param replacements
     DB_DIRECTORY=fairchains_path+getDB_DIRECTORY(fairchains_path)+'.electrumX'
     DAEMON_URL=getDAEMON_URL(fairchains_path)
-    SERVICES=getREPORT_SERVICES(path_to_fairchains_json)
+    SERVICES=getSERVICES(path_to_fairchains_json)
     REPORT_SERVICES=getREPORT_SERVICES(path_to_fairchains_json)
     SSL_KEYFILE=fairchains_path+'electrumx.key'
     SSL_CERTFILE=fairchains_path+'electrumx.crt'
