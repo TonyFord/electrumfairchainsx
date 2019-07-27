@@ -394,7 +394,10 @@ class FairChains(Coin):
         file=open(path_to_fairchains_json[:-5]+'.electrumx.json','r')
         J=json.loads( file.read() )
         file.close()
-        return J['PEERS']
+        P=[]
+        for i,v in J['PEERS'].items():
+            P.append(i+' s')
+        return P
 
     def getPEER_DEFAULT_PORTS(path_to_fairchains_json):
         file=open(path_to_fairchains_json[:-5]+'.electrumx.json','r')
