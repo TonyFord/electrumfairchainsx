@@ -281,7 +281,8 @@ class Coin(object):
 #
 #   default datapath can be override by commandline argument
 #   example:
-#       efcx_server --fairchains-path /home/<myusername>/.faircoin2/
+#       export FAIRCHAINS_PATH=/home/<myusername>/.faircoin2/
+#       efcx_server
 #
 # fairchains.conf
 #   rpcconnect=127.0.0.1
@@ -418,7 +419,8 @@ class FairChains(Coin):
         return ','.join(J['REPORT_SERVICES'])
 
     # data path getting params
-    fairchains_path=getArgv('--fairchains-path').result
+    # fairchains_path=getArgv('--fairchains-path').result
+    fairchains_path=os.environ.get('FAIRCHAINS_PATH')
     print(fairchains_path+'fairchains.conf')
     path_to_fairchains_json=fairchains_path+getDB_DIRECTORY(fairchains_path)+'.json'
     print(path_to_fairchains_json)
